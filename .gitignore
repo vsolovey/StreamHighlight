@@ -1,0 +1,12 @@
+
+*~
+
+notes.txt
+
+*.cuda-proj
+
+*.exe
+*.o
+
+obj/
+bin/
