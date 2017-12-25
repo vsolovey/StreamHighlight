@@ -4,13 +4,78 @@
 int LEN = 256;
 int DATA_MAX_LEN = 256;
 char esc = '\x1B';
-char cyan = 36; // '\x24'
-char decolor = 0;
+char *cyan = "\x1B[36m"; // '\x24'
+char *decolor = "\x1B[0m";
 
-int read(char rdbuf[], int buflen) {
-	int rd = fread(rdbuf, 1, buflen-1, stdin);
-	rdbuf[rd] = '\0';
-	return rd;
+int TRUE = -1;
+int FALSE = 0;
+
+int UNKNOWN = 0;
+int SUBSTRING = 1;
+int WORD = 2;
+int COLOR = 3;
+int SETTINGS = 4;
+int HELP = 5;
+
+void print_usage(char *cmd) {
+	printf("usage: %s { -s substring [-c color] | -w word [-c color] } | -f config_file | -h\n\t-s substring\tlook for substring\n\t-w word\tlook for word\n\t-c color\tpaint substring with color\n\t-f filename\tuse config file\n\t-h\tprint help\n", cmd);
+}
+
+int parse_arg_type(char *arg) {
+	int arg_type = UNKNOWN;
+	if (arg[0] == '-' && arg[1] != '\0' && arg[2] == '\0') {
+		switch(arg[1]) {
+			case('s'):
+				arg_type = SUBSTRING;
+				break;
+			case('w'):
+				arg_type = WORD;
+				break;
+			case('c'):
+				arg_type = COLOR;
+				break;
+			case('f'):
+				arg_type = SETTINGS;
+				break;
+			case('h'):
+				arg_type = HELP;
+				break;
+		}
+	}
+	
+	return arg_type;
+}
+
+int append_substring(char **argv, int argc, int arg_pos, char *data[], int data_pos) {
+	int ret = TRUE;
+	if (arg_pos < argc) {
+		data[data_pos] = argv[arg_pos];
+	} else {
+		print_usage(argv[0]);
+		ret = FALSE;
+	}
+	return ret;
+}
+
+int parse_args(char **argv, int argc, char *data[], int *data_len) {
+	int ok = TRUE;
+	int pos = *data_len;
+	int i = 1;
+	while (i < argc && ok == TRUE) {
+		int type = parse_arg_type(argv[i]);
+		if (type == UNKNOWN) {
+			printf("unknown arg: %s\n", argv[i]);
+			print_usage(argv[0]);
+			ok = FALSE;
+		} else if (type == SUBSTRING) {
+			i = i + 1;
+			ok = append_substring(argv, argc, i, data, pos);
+			pos = pos + 1;
+		}
+		i = i + 1;
+	}
+	*data_len = pos;
+	return ok;
 }
 
 /* candidate - это строка, начинающаяся с символа ch
@@ -38,10 +103,6 @@ int matched(char substring[], char rdbuf[], int pos, int rdbuf_len) {
 }
 
 void find_substr(char *data[], int data_len, char rdbuf[], int rdbuf_len, int *rdpos_cur, int *data_index) {
-	/* Итерация цикла:
-	1. пропустить символы, с которых не начинается ни одна подстрока
-	2. -> проверить, не является ли текущий символ началом искомой подстроки
-	*/
 	int i = -1;
 	int start_from = 0;
 	int pos = *rdpos_cur;
@@ -73,27 +134,25 @@ void copy(char rdbuf[], int rdpos_prev, int rdpos_cur, char wrbuf[], int *wrpos_
 	*wrpos_cur = *wrpos_cur + len;
 }
 
-int emphase_substr(char str[], int len, char wrbuf[], int pos) {
-	wrbuf[pos] = esc;
-	wrbuf[pos + 1] = cyan;
+int emphase_substr(char str[], int str_len, char wrbuf[], int *pos) {
+	int i = *pos;
+	char *dst = wrbuf + i;
+	int color_len = strlen(cyan);
+	memcpy(dst, cyan, color_len);
 
-	pos = pos + 2;
-	char *dst = wrbuf + pos;
-	memcpy(dst, str, len);
-	pos = pos + len;
+	i = i + color_len;
+	dst = wrbuf + i;
+	memcpy(dst, str, str_len);
 
-	wrbuf[pos] = esc;
-	wrbuf[pos + 1] = decolor;
+	i = i + str_len;
+	dst = wrbuf + i;
+	color_len = strlen(decolor);
+	memcpy(dst, decolor, color_len);
+
+	*pos = i + color_len;
 }
 
 int emphase_line(char rdbuf[], int rdbuf_len, char wrbuf[], /*int wrbuflen,*/ char *data[], int data_len) {
-   /* Итерация цикла:
-   1. найти подстроку в буфере чтения
-   2. скопировать префикс в буфер записи
-   3. добавить цвет в буфер записи
-   4. скопировать подстроку в буфер записи
-   5. добавить исходный цвет в буфер записи
-   */
 	int rdpos_prev = 0, rdpos_cur = 0;
 	int wrpos_cur = 0;
 	int data_index = 0;
@@ -103,7 +162,7 @@ int emphase_line(char rdbuf[], int rdbuf_len, char wrbuf[], /*int wrbuflen,*/ ch
 		int d_len = strlen(d);
 
 		copy(rdbuf, rdpos_prev, rdpos_cur, wrbuf, &wrpos_cur);
-		emphase_substr(d, d_len, wrbuf, wrpos_cur);
+		emphase_substr(d, d_len, wrbuf, &wrpos_cur);
 
 		rdpos_cur = rdpos_cur + d_len;
 		rdpos_prev = rdpos_cur;
@@ -111,31 +170,32 @@ int emphase_line(char rdbuf[], int rdbuf_len, char wrbuf[], /*int wrbuflen,*/ ch
 		find_substr(data, data_len, rdbuf, rdbuf_len, &rdpos_cur, &data_index);
 	}
 	copy(rdbuf, rdpos_prev, rdpos_cur, wrbuf, &wrpos_cur);
-}
-
-int write(const char wrbuf[], int buflen) {
-	int wr = fwrite(wrbuf, 1, buflen, stdout);
-	return wr;
+	return wrpos_cur;
 }
 
 /*
-   args: { -s substring [-c color] | -w word [-c color] } | -f config_file
+   args: { -s substring [-c color] | -w word [-c color] } | -f config_file | -h
 -s substring for emphase
 -c terminal color
 -w search for words only
 */
 void main(int argc, char **argv) {
 	char rdbuf[LEN];
-	char wrbuf[LEN*5];
-	char *data[DATA_MAX_LEN];
+	char wrbuf[LEN*11];
 
+	char *data[DATA_MAX_LEN];
 	int data_len = 0;
-   while (feof(stdin) == 0) {
-		int read = fread(rdbuf, 1, LEN, stdin);
-		emphase_line(rdbuf, LEN, wrbuf, data, data_len);
-		int written = fwrite(wrbuf, 1, read, stdout);
-		//printf("\n===\nread:%i, written:%i\n", read, written);
-		//printf("stdin:%i, stdout:%i\n", stdin, stdout);
+	int ok = parse_args(argv, argc, data, &data_len);
+
+	if (ok == TRUE) {
+		int i = 0;
+		while (i < data_len) {
+			i = i + 1;
+		}
+      while (feof(stdin) == 0) {
+   		int read = fread(rdbuf, 1, LEN, stdin);
+   		int write = emphase_line(rdbuf, read, wrbuf, data, data_len);
+   		int written = fwrite(wrbuf, 1, write, stdout);
+   	}
 	}
-	printf("done\n");
 }

@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS=
+CFLAGS=-O2
 
 #SRC=$(wildcard src/*.c)
 #OBJ=$(SRC:src%.c=obj%.o)
@@ -9,7 +9,7 @@ BIN_DIR=bin
 default: build
 
 $(OBJ_DIR)/%.o: src/%.c
-	$(CC) -c -o $@ $<
+	$(CC) $(CFLAGS) -c -o $@ $<
 
 directories: $(OBJ_DIR) $(BIN_DIR)
 
