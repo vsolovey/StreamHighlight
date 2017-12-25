@@ -1,6 +1,8 @@
 CC=gcc
 CFLAGS=-O2
 
+NAME=emph
+
 #SRC=$(wildcard src/*.c)
 #OBJ=$(SRC:src%.c=obj%.o)
 OBJ_DIR=obj
@@ -20,7 +22,7 @@ $(BIN_DIR):
 	mkdir $(BIN_DIR)
 
 compile: $(OBJ_DIR)/main.o 
-	$(CC) -o $(BIN_DIR)/emph $^
+	$(CC) $(CFLAGS) -o $(BIN_DIR)/$(NAME) $^
 
 build: | directories compile
 

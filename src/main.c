@@ -196,7 +196,9 @@ void main(int argc, char **argv) {
 			i = i + 1;
 		}
       while (feof(stdin) == 0) {
-   		int read = fread(rdbuf, 1, LEN, stdin);
+   		//int read = fread(rdbuf, 1, LEN, stdin);
+   		fgets(rdbuf, LEN, stdin);
+   		int read = strlen(rdbuf);
    		int write = emphase_line(rdbuf, read, wrbuf, data, data_len);
    		int written = fwrite(wrbuf, 1, write, stdout);
    	}
