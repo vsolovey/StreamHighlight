@@ -18,7 +18,7 @@ int SETTINGS = 4;
 int HELP = 5;
 
 void print_usage(char *cmd) {
-	printf("usage: %s { -s substring [-c color] | -w word [-c color] } | -f config_file | -h\n\t-s substring\tlook for substring\n\t-w word\tlook for word\n\t-c color\tpaint substring with color\n\t-f filename\tuse config file\n\t-h\tprint help\n", cmd);
+	printf("usage: %s { -s substring [-c color] | -w word [-c color] } | -f config_file | -h\n    -s substring   look for substring\n    -w word        look for word\n    -c color       paint substring with color\n    -f filename    use config file\n    -h             print help\n", cmd);
 }
 
 int parse_arg_type(char *arg) {
@@ -71,6 +71,9 @@ int parse_args(char **argv, int argc, char *data[], int *data_len) {
 			i = i + 1;
 			ok = append_substring(argv, argc, i, data, pos);
 			pos = pos + 1;
+		} else if (type == HELP) {
+			print_usage(argv[0]);
+			ok = FALSE;
 		}
 		i = i + 1;
 	}
