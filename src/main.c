@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 
-int LEN = 16;
+int LEN = 256;
 int DATA_MAX_LEN = 256;
 char esc = '\x1B';
 char *cyan = "\x1B[36m"; // '\x24'
@@ -138,21 +138,9 @@ void copy(char rdbuf[], int rdpos_prev, int rdpos_cur, char wrbuf[], int *wrpos_
 }
 
 int emphase_substr(char str[], int str_len, char wrbuf[], int *pos) {
-	int i = *pos;
-	char *dst = wrbuf + i;
-	int color_len = strlen(cyan);
-	memcpy(dst, cyan, color_len);
-
-	i = i + color_len;
-	dst = wrbuf + i;
-	memcpy(dst, str, str_len);
-
-	i = i + str_len;
-	dst = wrbuf + i;
-	color_len = strlen(decolor);
-	memcpy(dst, decolor, color_len);
-
-	*pos = i + color_len;
+	copy(cyan, 0, strlen(cyan), wrbuf, pos);
+	copy(str, 0, str_len, wrbuf, pos);
+	copy(decolor, 0, strlen(decolor), wrbuf, pos);
 }
 
 int emphase_line(char rdbuf[], int rdbuf_len, char wrbuf[], /*int wrbuflen,*/ char *data[], int data_len) {
