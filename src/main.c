@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 
-int LEN = 256;
+int LEN = 16;
 int DATA_MAX_LEN = 256;
 char esc = '\x1B';
 char *cyan = "\x1B[36m"; // '\x24'
@@ -195,12 +195,13 @@ void main(int argc, char **argv) {
 		while (i < data_len) {
 			i = i + 1;
 		}
+
+		fgets(rdbuf, LEN, stdin);
       while (feof(stdin) == 0) {
-   		//int read = fread(rdbuf, 1, LEN, stdin);
-   		fgets(rdbuf, LEN, stdin);
    		int read = strlen(rdbuf);
    		int write = emphase_line(rdbuf, read, wrbuf, data, data_len);
    		int written = fwrite(wrbuf, 1, write, stdout);
+			fgets(rdbuf, LEN, stdin);
    	}
 	}
 }
