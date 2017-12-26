@@ -123,6 +123,7 @@ void find_substr(char *data[], int data_len, char rdbuf[], int rdbuf_len, int *r
    			*data_index = candidate;
    		} else {
 				pos = pos + 1;
+				start_from = 0;
    		}
 		}
 		*rdpos_cur = pos;
