@@ -129,18 +129,16 @@ void find_substr(char *data[], int data_len, char rdbuf[], int rdbuf_len, int *r
 	}
 }
 
-void copy(char rdbuf[], int rdpos_prev, int rdpos_cur, char wrbuf[], int *wrpos_cur) {
-	int len = rdpos_cur - rdpos_prev;
-	char *dst = wrbuf + *wrpos_cur;
-	char *src = rdbuf + rdpos_prev;
-	memcpy(dst, src, len);
-	*wrpos_cur = *wrpos_cur + len;
+void copy(char src[], int src_len, char dst_base[], int *dst_offset) {
+	char *dst = dst_base + *dst_offset;
+	memcpy(dst, src, src_len);
+	*dst_offset = *dst_offset + src_len;
 }
 
 int emphase_substr(char str[], int str_len, char wrbuf[], int *pos) {
-	copy(cyan, 0, strlen(cyan), wrbuf, pos);
-	copy(str, 0, str_len, wrbuf, pos);
-	copy(decolor, 0, strlen(decolor), wrbuf, pos);
+	copy(cyan, strlen(cyan), wrbuf, pos);
+	copy(str, str_len, wrbuf, pos);
+	copy(decolor, strlen(decolor), wrbuf, pos);
 }
 
 int emphase_line(char rdbuf[], int rdbuf_len, char wrbuf[], /*int wrbuflen,*/ char *data[], int data_len) {
@@ -152,7 +150,9 @@ int emphase_line(char rdbuf[], int rdbuf_len, char wrbuf[], /*int wrbuflen,*/ ch
 		char *d = data[data_index];
 		int d_len = strlen(d);
 
-		copy(rdbuf, rdpos_prev, rdpos_cur, wrbuf, &wrpos_cur);
+		char *tmp = rdbuf + rdpos_prev;
+		int tmp_len = rdpos_cur - rdpos_prev;
+		copy(tmp, tmp_len, wrbuf, &wrpos_cur);
 		emphase_substr(d, d_len, wrbuf, &wrpos_cur);
 
 		rdpos_cur = rdpos_cur + d_len;
@@ -160,7 +160,9 @@ int emphase_line(char rdbuf[], int rdbuf_len, char wrbuf[], /*int wrbuflen,*/ ch
 
 		find_substr(data, data_len, rdbuf, rdbuf_len, &rdpos_cur, &data_index);
 	}
-	copy(rdbuf, rdpos_prev, rdpos_cur, wrbuf, &wrpos_cur);
+		char *tmp = rdbuf + rdpos_prev;
+		int tmp_len = rdpos_cur - rdpos_prev;
+		copy(tmp, tmp_len, wrbuf, &wrpos_cur);
 	return wrpos_cur;
 }
 
