@@ -3,6 +3,7 @@
 
 int LEN = 256;
 int DATA_MAX_LEN = 256;
+
 char esc = '\x1B';
 char *cyan = "\x1B[36m"; // '\x24'
 char *decolor = "\x1B[0m";
@@ -23,7 +24,7 @@ void print_usage(char *cmd) {
 
 int parse_arg_type(char *arg) {
 	int arg_type = UNKNOWN;
-	if (arg[0] == '-' && arg[1] != '\0' && arg[2] == '\0') {
+	if (arg[0] == '-' && arg[1] != 0 && arg[2] == 0) {
 		switch(arg[1]) {
 			case('s'):
 				arg_type = SUBSTRING;
@@ -46,10 +47,10 @@ int parse_arg_type(char *arg) {
 	return arg_type;
 }
 
-int append_substring(char **argv, int argc, int arg_pos, char *data[], int data_pos) {
+int append_substring(char **argv, int argc, int arg_pos, char *strings[], int string_pos) {
 	int ret = TRUE;
 	if (arg_pos < argc) {
-		data[data_pos] = argv[arg_pos];
+		strings[string_pos] = argv[arg_pos];
 	} else {
 		print_usage(argv[0]);
 		ret = FALSE;
@@ -57,25 +58,39 @@ int append_substring(char **argv, int argc, int arg_pos, char *data[], int data_
 	return ret;
 }
 
-int parse_args(char **argv, int argc, char *data[], int *data_len) {
+int append_color(char **argv, int argc, int arg_pos, char *colors[], int color_pos) {
+	int ret = TRUE;
+	if (color_pos > 0 && arg_pos < argc) {
+		colors[color_pos] = argv[arg_pos];
+	} else {
+		print_usage(argv[0]);
+		ret = FALSE;
+	}
+}
+
+int parse_args(char **argv, int argc, char *data[2][DATA_MAX_LEN], int *data_len) {
 	int ok = TRUE;
 	int pos = *data_len;
-	int i = 1;
-	while (i < argc && ok == TRUE) {
-		int type = parse_arg_type(argv[i]);
+	int arg = 1;
+	while (arg < argc && ok == TRUE) {
+		int type = parse_arg_type(argv[arg]);
 		if (type == UNKNOWN) {
-			printf("unknown arg: %s\n", argv[i]);
+			printf("unknown arg: %s\n", argv[arg]);
 			print_usage(argv[0]);
 			ok = FALSE;
 		} else if (type == SUBSTRING) {
-			i = i + 1;
-			ok = append_substring(argv, argc, i, data, pos);
+			arg = arg + 1;
+			ok = append_substring(argv, argc, arg, data[0], pos);
+			data[1][pos] = cyan;
 			pos = pos + 1;
+		} else if (type == COLOR) {
+			arg = arg + 1;
+			ok = append_color(argv, argc, arg, data[1], pos - 1);
 		} else if (type == HELP) {
 			print_usage(argv[0]);
 			ok = FALSE;
 		}
-		i = i + 1;
+		arg = arg + 1;
 	}
 	*data_len = pos;
 	return ok;
@@ -177,22 +192,17 @@ void main(int argc, char **argv) {
 	char rdbuf[LEN];
 	char wrbuf[LEN*11];
 
-	char *data[DATA_MAX_LEN];
+	char *data[2][DATA_MAX_LEN];
 	int data_len = 0;
 	int ok = parse_args(argv, argc, data, &data_len);
 
 	if (ok == TRUE) {
-		int i = 0;
-		while (i < data_len) {
-			i = i + 1;
-		}
-
 		fgets(rdbuf, LEN, stdin);
-      while (feof(stdin) == 0) {
-   		int read = strlen(rdbuf);
-   		int write = emphase_line(rdbuf, read, wrbuf, data, data_len);
-   		int written = fwrite(wrbuf, 1, write, stdout);
+		while (feof(stdin) == 0) {
+			int read = strlen(rdbuf);
+			int write = emphase_line(rdbuf, read, wrbuf, data, data_len);
+			int written = fwrite(wrbuf, 1, write, stdout);
 			fgets(rdbuf, LEN, stdin);
-   	}
+		}
 	}
 }
