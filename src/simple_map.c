@@ -1,22 +1,22 @@
 #include <malloc.h>
 
-
-
-const int VALUE_SIZE = 10;
+//#define get_arr_item(arr, index) (char*)&(arr[index * valsize])
+#define get_arr_item(arr, index) ((char*)(arr + index * valsize))
 
 char **keys;
-char **values;
+char *values;
 
-int max;
+int max, valsize;
 int len = 0;
 int in_use = 0;
 
-int map_init(int max_map_size) {
+int map_init(int max_map_size, int max_value_size) {
 	int initialized = in_use != 0;
 	if (!initialized) {
 		max = max_map_size;
+		valsize = max_value_size;
 		keys = (char**)malloc(max * sizeof(int));
-		values = (char**)malloc(max * VALUE_SIZE);
+		values = (char*)malloc(max * max_value_size);
 		in_use = 1;
 	}
 	return !initialized;
@@ -44,7 +44,7 @@ char* map_get(char *key) {
 	char *ret = NULL;
 	int i = map_get_key_index(key);
 	if (i < len) {
-		ret = values[i];
+		ret = get_arr_item(values, i);
 	}
 	return ret;
 }
@@ -53,7 +53,7 @@ char* map_put(char *key) {
 	char *value = NULL;
 	if (!map_contain(key)) {
 		keys[len] = key;
-		value = values[len];
+		value = get_arr_item(values, len);
 		len = len + 1;
 	} else {
 		value = map_get(key);

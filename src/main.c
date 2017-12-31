@@ -1,14 +1,17 @@
 #include <stdio.h>
 #include <string.h>
+#include "../include/simple_map.h"
 
 int LEN = 256;
 int DATA_MAX_LEN = 256;
+int COLOR_SIZE = 10;
+
 
 char esc = '\x1B';
 char *cyan = "\x1B[36m"; // '\x24'
 char *decolor = "\x1B[0m";
 
-int TRUE = -1;
+int TRUE = 1;
 int FALSE = 0;
 
 int UNKNOWN = 0;
@@ -58,14 +61,36 @@ int append_substring(char **argv, int argc, int arg_pos, char *strings[], int st
 	return ret;
 }
 
+int is_valid_color(char *color) {
+	int len = strlen(color);
+	int i = 0;
+	if (len <= 3 && len > 0) {
+		char ch = color[i];
+		while (i < len && ch >= '0' && ch <= '9') {
+			i = i + 1;
+			ch = color[i];
+		}
+	}
+	return i == len;
+}
+
 int append_color(char **argv, int argc, int arg_pos, char *colors[], int color_pos) {
 	int ret = TRUE;
-	if (color_pos > 0 && arg_pos < argc) {
-		colors[color_pos] = argv[arg_pos];
+	if (color_pos >= 0 && arg_pos < argc) {
+		char *color = argv[arg_pos];
+		if (is_valid_color(color)) {
+			if (!map_contain(color)) {
+				sprintf(map_put(color), "\x1B[%sm", color);
+			}
+		} else {
+			sprintf(map_put(color), "%s", cyan);
+		}
+		colors[color_pos] = map_get(color);
 	} else {
 		print_usage(argv[0]);
 		ret = FALSE;
 	}
+	return ret;
 }
 
 int parse_args(char **argv, int argc, char *data[2][DATA_MAX_LEN], int *data_len) {
@@ -120,7 +145,7 @@ int matched(char substring[], char rdbuf[], int pos, int rdbuf_len) {
 	return substring[i] == 0;
 }
 
-void find_substr(char *data[], int data_len, char rdbuf[], int rdbuf_len, int *rdpos_cur, int *data_index) {
+void find_substr(char *data[DATA_MAX_LEN], int data_len, char rdbuf[], int rdbuf_len, int *rdpos_cur, int *data_index) {
 	int i = -1;
 	int start_from = 0;
 	int pos = *rdpos_cur;
@@ -151,30 +176,30 @@ void copy(char src[], int src_len, char dst_base[], int *dst_offset) {
 	*dst_offset = *dst_offset + src_len;
 }
 
-int emphase_substr(char str[], int str_len, char wrbuf[], int *pos) {
-	copy(cyan, strlen(cyan), wrbuf, pos);
+int emphase_substr(char str[], char *color, int str_len, char wrbuf[], int *pos) {
+	copy(color, strlen(color), wrbuf, pos);
 	copy(str, str_len, wrbuf, pos);
 	copy(decolor, strlen(decolor), wrbuf, pos);
 }
 
-int emphase_line(char rdbuf[], int rdbuf_len, char wrbuf[], /*int wrbuflen,*/ char *data[], int data_len) {
+int emphase_line(char rdbuf[], int rdbuf_len, char wrbuf[], /*int wrbuflen,*/ char *data[2][DATA_MAX_LEN], int data_len) {
 	int rdpos_prev = 0, rdpos_cur = 0;
 	int wrpos_cur = 0;
 	int data_index = 0;
-	find_substr(data, data_len, rdbuf, rdbuf_len, &rdpos_cur, &data_index);
+	find_substr(data[0], data_len, rdbuf, rdbuf_len, &rdpos_cur, &data_index);
 	while (rdpos_cur < rdbuf_len) {
-		char *d = data[data_index];
+		char *d = data[0][data_index];
 		int d_len = strlen(d);
 
 		char *tmp = rdbuf + rdpos_prev;
 		int tmp_len = rdpos_cur - rdpos_prev;
 		copy(tmp, tmp_len, wrbuf, &wrpos_cur);
-		emphase_substr(d, d_len, wrbuf, &wrpos_cur);
+		emphase_substr(d, data[1][data_index], d_len, wrbuf, &wrpos_cur);
 
 		rdpos_cur = rdpos_cur + d_len;
 		rdpos_prev = rdpos_cur;
 
-		find_substr(data, data_len, rdbuf, rdbuf_len, &rdpos_cur, &data_index);
+		find_substr(data[0], data_len, rdbuf, rdbuf_len, &rdpos_cur, &data_index);
 	}
 		char *tmp = rdbuf + rdpos_prev;
 		int tmp_len = rdpos_cur - rdpos_prev;
@@ -190,11 +215,13 @@ int emphase_line(char rdbuf[], int rdbuf_len, char wrbuf[], /*int wrbuflen,*/ ch
 */
 void main(int argc, char **argv) {
 	char rdbuf[LEN];
-	char wrbuf[LEN*11];
+	char wrbuf[LEN*21];
 
+	int ok = map_init(DATA_MAX_LEN, COLOR_SIZE);
 	char *data[2][DATA_MAX_LEN];
 	int data_len = 0;
-	int ok = parse_args(argv, argc, data, &data_len);
+	ok = ok && parse_args(argv, argc, data, &data_len);
+		char *ch = NULL;
 
 	if (ok == TRUE) {
 		fgets(rdbuf, LEN, stdin);
@@ -205,4 +232,5 @@ void main(int argc, char **argv) {
 			fgets(rdbuf, LEN, stdin);
 		}
 	}
+	map_dispose();
 }
