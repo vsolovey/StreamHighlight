@@ -1,10 +1,9 @@
 #include <stdio.h>
 #include <string.h>
-#include "../include/simple_map.h"
+#include "simple_map.h"
+#include "common.h"
 
-int LEN = 256;
-int DATA_MAX_LEN = 256;
-int COLOR_SIZE = 10;
+int BUF_LEN = 256;
 
 
 char esc = '\x1B';
@@ -214,23 +213,21 @@ int emphase_line(char rdbuf[], int rdbuf_len, char wrbuf[], /*int wrbuflen,*/ ch
 -w search for words only
 */
 void main(int argc, char **argv) {
-	char rdbuf[LEN];
-	char wrbuf[LEN*21];
+	char rdbuf[BUF_LEN];
+	char wrbuf[BUF_LEN*21];
 
-	int ok = map_init(DATA_MAX_LEN, COLOR_SIZE);
 	char *data[2][DATA_MAX_LEN];
 	int data_len = 0;
-	ok = ok && parse_args(argv, argc, data, &data_len);
-		char *ch = NULL;
+	int ok = parse_args(argv, argc, data, &data_len);
+	char *ch = NULL;
 
 	if (ok == TRUE) {
-		fgets(rdbuf, LEN, stdin);
+		fgets(rdbuf, BUF_LEN, stdin);
 		while (feof(stdin) == 0) {
 			int read = strlen(rdbuf);
 			int write = emphase_line(rdbuf, read, wrbuf, data, data_len);
 			int written = fwrite(wrbuf, 1, write, stdout);
-			fgets(rdbuf, LEN, stdin);
+			fgets(rdbuf, BUF_LEN, stdin);
 		}
 	}
-	map_dispose();
 }
