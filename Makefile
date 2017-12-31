@@ -1,19 +1,18 @@
 CC=gcc
-CFLAGS=-O2
+CFLAGS=-O2 -Iinclude
 
 NAME=emph
 
-#SRC=$(wildcard src/*.c)
-#OBJ=$(SRC:src%.c=obj%.o)
+SRC_DIR=src
 OBJ_DIR=obj
 BIN_DIR=bin
+SRC=$(wildcard $(SRC_DIR)/*.c)
+OBJ=$(SRC:$(SRC_DIR)%.c=$(OBJ_DIR)%.o)
 
 default: build
 
-$(OBJ_DIR)/%.o: src/%.c
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.c | $(OBJ_DIR)
 	$(CC) $(CFLAGS) -c -o $@ $<
-
-directories: $(OBJ_DIR) $(BIN_DIR)
 
 $(OBJ_DIR):
 	mkdir $(OBJ_DIR)
@@ -21,10 +20,13 @@ $(OBJ_DIR):
 $(BIN_DIR):
 	mkdir $(BIN_DIR)
 
-compile: $(OBJ_DIR)/main.o 
+$(BIN_DIR)/$(NAME): $(OBJ) | $(BIN_DIR)
 	$(CC) $(CFLAGS) -o $(BIN_DIR)/$(NAME) $^
 
-build: | directories compile
+compilemain: $(BIN_DIR)/$(NAME)
+
+
+build: compilemain
 
 clean:
 	rm -rfv bin obj

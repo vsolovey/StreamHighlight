@@ -7,6 +7,9 @@ notes.txt
 
 *.exe
 *.o
+*.stackdump
 
 obj/
 bin/
+test/
+
