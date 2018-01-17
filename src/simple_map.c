@@ -1,7 +1,5 @@
 #include "common.h"
 
-#define get_arr_item(arr, index) ((char*)(arr + index * valsize))
-
 char *keys[DATA_MAX_LEN];
 char values[DATA_MAX_LEN][COLOR_SIZE];
 
