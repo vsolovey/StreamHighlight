@@ -6,6 +6,7 @@ INC_DIR=include
 SRC_DIR=src
 OBJ_DIR=obj
 BIN_DIR=bin
+TEST_DIR=test
 
 CFLAGS=-O2 -I$(INC_DIR)
 
@@ -24,7 +25,11 @@ $(BIN_DIR):
 	mkdir $(BIN_DIR)
 
 $(BIN_DIR)/$(NAME): $(OBJ) | $(BIN_DIR)
-	$(CC) $(CFLAGS) -o $(BIN_DIR)/$(NAME) $^
+	$(CC) $(CFLAGS) -o $(BIN_DIR)/$(NAME) $(SRC_DIR)/main/main.c $^
+
+$(BIN_DIR)/%: $(TEST_DIR)/%.c $(OBJ) | $(BIN_DIR)
+	#echo '$!' '$%' '$&' '$*' '$<' '$^'
+	$(CC) $(CFLAGS) -o $(BIN_DIR)/$* $^
 
 compilemain: $(BIN_DIR)/$(NAME)
 
