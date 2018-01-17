@@ -3,6 +3,7 @@
 #include "common.h"
 #include "colors.h"
 #include "simple_map.h"
+#include "file_args.h"
 
 #define UNKNOWN 0
 #define SUBSTRING 1
@@ -12,7 +13,7 @@
 #define HELP 5
 
 void print_usage(char *cmd) {
-	printf("usage: %s { -s substring [-c color] | -w word [-c color] } | -f config_file | -h\n    -s substring   look for substring\n    -w word        look for word\n    -c color       paint substring with color\n    -f filename    use config file\n    -h             print help\n", cmd);
+	printf("usage: %s { -s substring [-c color] | -w word [-c color] }\n       %s -f config_file\n       %s -h\n    -s substring   look for substring\n    -w word        look for word\n    -c color       paint substring with color\n    -f filename    use config file\n    -h             print help\n", cmd, cmd, cmd);
 }
 
 int parse_arg_type(char *arg) {
@@ -83,12 +84,22 @@ int append_color(char **argv, int argc, int arg_pos, char *colors[], int color_p
 	return ret;
 }
 
+void print_arr(int argc, char **argv) {
+	int i = 0;
+	while (i < argc) {
+		printf("%s\n", argv[i]);
+		i = i + 1;
+	}
+}
+
 int parse_args(char *cmdname, char **argv, int argc, char *data[2][DATA_MAX_LEN], int *data_len) {
+	print_arr(argc, argv);
 	int ok = TRUE;
 	int pos = *data_len;
+	int type = UNKNOWN;
 	int arg = 0;
 	while (arg < argc && ok == TRUE) {
-		int type = parse_arg_type(argv[arg]);
+		type = parse_arg_type(argv[arg]);
 		if (type == UNKNOWN) {
 			printf("unknown arg: %s\n", argv[arg]);
 			print_usage(argv[0]);
@@ -104,9 +115,23 @@ int parse_args(char *cmdname, char **argv, int argc, char *data[2][DATA_MAX_LEN]
 		} else if (type == HELP) {
 			print_usage(cmdname);
 			ok = FALSE;
+		} else if (type == SETTINGS) {
+			arg = arg + 1;
+			ok = argc - 1 == arg;
+			if (ok) {
+				int file_argc = 0;
+				char *file_argv[DATA_MAX_LEN];
+				parse_file(argv[arg], &file_argc, file_argv);
+				ok = validate(file_argc, file_argv);
+				if (ok) {
+					ok = parse_args(cmdname, file_argv, file_argc, data, data_len);
+				}
+			}
 		}
 		arg = arg + 1;
 	}
-	*data_len = pos;
+	if (type != SETTINGS) {
+		*data_len = pos;
+	}
 	return ok;
 }
