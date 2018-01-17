@@ -120,7 +120,7 @@ int parse_args(char **argv, int argc, char *data[2][DATA_MAX_LEN], int *data_len
 	return ok;
 }
 
-/* candidate - это строка, начинающаяся с символа ch
+/* candidate - СЌС‚Рѕ СЃС‚СЂРѕРєР°, РЅР°С‡РёРЅР°СЋС‰Р°СЏСЃСЏ СЃ СЃРёРјРІРѕР»Р° ch
 ch - first character of a string
 data - array of strings
 data_len - length of data
