@@ -1,6 +1,6 @@
 #include <string.h>
 #include "common.h"
-#include "color.h"
+#include "colors.h"
 
 
 /* candidate - это строка, начинающаяся с символа ch

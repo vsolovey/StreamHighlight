@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "common.h"
-#include "color.h"
+#include "colors.h"
 #include "simple_map.h"
 
 #define UNKNOWN 0
@@ -70,10 +70,10 @@ int append_color(char **argv, int argc, int arg_pos, char *colors[], int color_p
 		char *color = argv[arg_pos];
 		if (is_valid_color(color)) {
 			if (!map_contain(color)) {
-				sprintf(map_put(color), "\x1B[%sm", color);
+				map_put(color, get_color(color));
 			}
 		} else {
-			sprintf(map_put(color), "%s", cyan);
+			map_put(color, get_color(color));
 		}
 		colors[color_pos] = map_get(color);
 	} else {
@@ -83,10 +83,10 @@ int append_color(char **argv, int argc, int arg_pos, char *colors[], int color_p
 	return ret;
 }
 
-int parse_args(char **argv, int argc, char *data[2][DATA_MAX_LEN], int *data_len) {
+int parse_args(char *cmdname, char **argv, int argc, char *data[2][DATA_MAX_LEN], int *data_len) {
 	int ok = TRUE;
 	int pos = *data_len;
-	int arg = 1;
+	int arg = 0;
 	while (arg < argc && ok == TRUE) {
 		int type = parse_arg_type(argv[arg]);
 		if (type == UNKNOWN) {
@@ -102,7 +102,7 @@ int parse_args(char **argv, int argc, char *data[2][DATA_MAX_LEN], int *data_len
 			arg = arg + 1;
 			ok = append_color(argv, argc, arg, data[1], pos - 1);
 		} else if (type == HELP) {
-			print_usage(argv[0]);
+			print_usage(cmdname);
 			ok = FALSE;
 		}
 		arg = arg + 1;

@@ -1,7 +1,7 @@
 #include "common.h"
 
 char *keys[DATA_MAX_LEN];
-char values[DATA_MAX_LEN][COLOR_SIZE];
+char *values[DATA_MAX_LEN];
 
 int len = 0;
 int in_use = 0;
@@ -27,16 +27,15 @@ char* map_get(char *key) {
 	return ret;
 }
 
-char* map_put(char *key) {
-	char *value = 0;
-	if (!map_contain(key)) {
+void map_put(char *key, char *value) {
+	int index = map_get_key_index(key);
+	if (index == len) {
 		keys[len] = key;
-		value = values[len];
+		values[len] = value;
 		len = len + 1;
 	} else {
-		value = map_get(key);
+		values[index] = value;
 	}
-	return value;
 }
 
 int map_size() {

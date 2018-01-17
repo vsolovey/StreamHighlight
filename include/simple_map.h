@@ -2,7 +2,7 @@
 #define SIMPLE_MAP_H_
 
 int map_contain(char *key);
-char* map_put(char *key);
+void map_put(char *key, char *value);
 char* map_get(char *key);
 int map_size();
 

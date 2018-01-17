@@ -4,5 +4,7 @@
 extern char *cyan;
 extern char *decolor;
 
+void colors_init();
+char *get_color(char *num);
 
 #endif
