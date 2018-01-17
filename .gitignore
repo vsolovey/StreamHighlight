@@ -4,6 +4,7 @@
 notes.txt
 
 *.cuda-proj
+*.code-workspace
 
 *.exe
 *.o
@@ -12,4 +13,4 @@ notes.txt
 obj/
 bin/
 test/
-
+.vscode/
