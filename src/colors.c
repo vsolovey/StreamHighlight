@@ -2,47 +2,47 @@
 #include <stdlib.h>
 
 // color = '<esc>[<num>m'
-//const char esc = '\x1B';
+//const char esc = '\x1B'; '\e'
 
 
-const char *black = "\x1B[30m";
-const char *red = "\x1B[31m";
-const char *green = "\x1B[32m";
-const char *yellow = "\x1B[33m";
-const char *blue = "\x1B[34m";
-const char *magneta = "\x1B[35m";
-const char *cyan = "\x1B[36m";
-const char *light_gray = "\x1B[37m";
+const char *black = "\e[30m";
+const char *red = "\e[31m";
+const char *green = "\e[32m";
+const char *yellow = "\e[33m";
+const char *blue = "\e[34m";
+const char *magneta = "\e[35m";
+const char *cyan = "\e[36m";
+const char *light_gray = "\e[37m";
 
-const char *dark_gray = "\x1B[90m";
-const char *light_red = "\x1B[91m";
-const char *light_green = "\x1B[92m";
-const char *light_yellow = "\x1B[93m";
-const char *light_blue = "\x1B[94m";
-const char *light_magneta = "\x1B[95m";
-const char *light_cyan = "\x1B[96m";
-const char *white = "\x1B[97m";
+const char *dark_gray = "\e[90m";
+const char *light_red = "\e[91m";
+const char *light_green = "\e[92m";
+const char *light_yellow = "\e[93m";
+const char *light_blue = "\e[94m";
+const char *light_magneta = "\e[95m";
+const char *light_cyan = "\e[96m";
+const char *white = "\e[97m";
 
 
-const char *black_bg = "\x1B[40m";
-const char *red_bg = "\x1B[41m";
-const char *green_bg = "\x1B[42m";
-const char *yellow_bg = "\x1B[43m";
-const char *blue_bg = "\x1B[44m";
-const char *magneta_bg = "\x1B[45m";
-const char *cyan_bg = "\x1B[46m";
-const char *light_gray_bg = "\x1B[47m";
+const char *black_bg = "\e[40m";
+const char *red_bg = "\e[41m";
+const char *green_bg = "\e[42m";
+const char *yellow_bg = "\e[43m";
+const char *blue_bg = "\e[44m";
+const char *magneta_bg = "\e[45m";
+const char *cyan_bg = "\e[46m";
+const char *light_gray_bg = "\e[47m";
 
-const char *dark_gray_bg = "\x1B[100m";
-const char *light_red_bg = "\x1B[101m";
-const char *light_green_bg = "\x1B[102m";
-const char *light_yellow_bg = "\x1B[103m";
-const char *light_blue_bg = "\x1B[104m";
-const char *light_magneta_bg = "\x1B[105m";
-const char *light_cyan_bg = "\x1B[106m";
-const char *white_bg = "\x1B[107m";
+const char *dark_gray_bg = "\e[100m";
+const char *light_red_bg = "\e[101m";
+const char *light_green_bg = "\e[102m";
+const char *light_yellow_bg = "\e[103m";
+const char *light_blue_bg = "\e[104m";
+const char *light_magneta_bg = "\e[105m";
+const char *light_cyan_bg = "\e[106m";
+const char *white_bg = "\e[107m";
 
-const char *decolor = "\x1B[0m";
+const char *decolor = "\e[0m";
 
 static const char *colors[40];
 
