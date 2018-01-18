@@ -24,8 +24,9 @@ $(OBJ_DIR):
 $(BIN_DIR):
 	mkdir $(BIN_DIR)
 
-$(BIN_DIR)/$(NAME): $(OBJ) | $(BIN_DIR)
-	$(CC) $(CFLAGS) -o $(BIN_DIR)/$(NAME) $(SRC_DIR)/main/main.c $^
+$(BIN_DIR)/$(NAME): $(OBJ) $(SRC_DIR)/main/main.c | $(BIN_DIR)
+	$(CC) $(CFLAGS) -o $(BIN_DIR)/$(NAME) $^
+	strip -s $(BIN_DIR)/$(NAME)
 
 $(BIN_DIR)/%: $(TEST_DIR)/%.c $(OBJ) | $(BIN_DIR)
 	#echo '$!' '$%' '$&' '$*' '$<' '$^'
