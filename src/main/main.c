@@ -3,7 +3,7 @@
 #include <malloc.h>
 #include "common.h"
 #include "colors.h"
-#include "cmd_line_args.h"
+#include "color_settings_parser.h"
 #include "highlight.h"
 
 
