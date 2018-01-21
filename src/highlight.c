@@ -3,6 +3,14 @@
 #include "colors.h"
 
 
+int wordpart(char ch) {
+	return ch != ' ' && ch != '\t' && ch != '\r' && ch != '\n' && ch != '\0';
+}
+
+int matched_type(elem e, char ch, int is_space_before) {
+	return e.type == SUBSTRING && e.str[0] == ch || e.type == WORD && is_space_before && e.str[0] == ch;
+}
+
 /* candidate - это строка, начинающаяся с символа ch
 ch - first character of a string
 data - array of strings
@@ -10,42 +18,45 @@ data_len - length of data
 data_pos - start position for looking for candidates
 returns index of candidate. If the index equals data_len, then data have no candidates.
 */
-int get_candidate(char ch, elem data[], int data_len, int data_pos) {
-	while (data_pos < data_len && data[data_pos].str[0] != ch) {
+int get_candidate(char ch, elem data[], int data_len, int data_pos, int is_space_before) {
+	while (data_pos < data_len && !matched_type(data[data_pos], ch, is_space_before)) {
 		data_pos = data_pos + 1;
 	}
 	return data_pos;
 }
 
-int matched(char substring[], char rdbuf[], int pos, int rdbuf_len) {
-	char *string = rdbuf + pos;
-	int len = rdbuf_len - pos;
+int matched_str(elem *e, char buf[], int pos, int buf_len) {
+	char *string = buf + pos;
+	int len = buf_len - pos;
 	int i = 0;
-	while (i < len && substring[i] == string[i]) {
+	while (i < len && e->str[i] == string[i]) {
 		i = i + 1;
 	}
-	return substring[i] == 0;
+	return e->str[i] == '\0' && (e->type == SUBSTRING || e->type == WORD && !wordpart(string[i]));
 }
 
 void find_substr(elem data[DATA_MAX_LEN], int data_len, char rdbuf[], int rdbuf_len, int *rdpos_cur, int *data_index) {
 	int i = -1;
 	int start_from = 0;
 	int pos = *rdpos_cur;
+	int is_space_before = !wordpart(' ');
 	while (pos < rdbuf_len && i == -1) {
-		int candidate = get_candidate(rdbuf[pos], data, data_len, start_from);
-		if (candidate == data_len) {
+		int candidate = get_candidate(rdbuf[pos], data, data_len, start_from, is_space_before);
+		if (candidate == data_len) { // no candidates found
+			is_space_before = !wordpart(rdbuf[pos]);
 			pos = pos + 1;
 		} else {
-			while (candidate < data_len && !matched(data[candidate].str, rdbuf, pos, rdbuf_len)) {
+			while (candidate < data_len && !matched_str(&data[candidate], rdbuf, pos, rdbuf_len)) {
 				start_from = candidate + 1;
-				candidate = get_candidate(rdbuf[pos], data, data_len, start_from);
+				candidate = get_candidate(rdbuf[pos], data, data_len, start_from, is_space_before);
 			}
-				if (candidate < data_len) {
+			if (candidate < data_len) {
 				i = candidate;
 				*data_index = candidate;
 			} else {
-					pos = pos + 1;
-					start_from = 0;
+				is_space_before = !wordpart(rdbuf[pos]);
+				pos = pos + 1;
+				start_from = 0;
 			}
 		}
 		*rdpos_cur = pos;

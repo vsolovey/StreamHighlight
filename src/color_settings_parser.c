@@ -34,10 +34,10 @@ int parse_arg_type(char *arg) {
 	return arg_type;
 }
 
-int append_substring(char **argv, int argc, int arg_pos, elem *e) {
+int append_substring(char **argv, int argc, int arg_pos, short type, elem *e) {
 	int ret = TRUE;
 	if (arg_pos < argc) {
-		e->type = SUBSTRING;
+		e->type = type;
 		e->str = argv[arg_pos];
 	} else {
 		print_usage(argv[0]);
@@ -90,7 +90,7 @@ int parse_args(char *cmdname, char **argv, int argc, elem data[DATA_MAX_LEN], in
 	//print_arr(argc, argv);
 	int ok = TRUE;
 	int pos = *data_len;
-	int type = UNKNOWN;
+	short type = UNKNOWN;
 	int arg = 0;
 	while (arg < argc && ok == TRUE) {
 		type = parse_arg_type(argv[arg]);
@@ -98,9 +98,9 @@ int parse_args(char *cmdname, char **argv, int argc, elem data[DATA_MAX_LEN], in
 			printf("unknown arg: %s\n", argv[arg]);
 			print_usage(argv[0]);
 			ok = FALSE;
-		} else if (type == SUBSTRING) {
+		} else if (type == SUBSTRING || type == WORD) {
 			arg = arg + 1;
-			ok = append_substring(argv, argc, arg, &data[pos]);
+			ok = append_substring(argv, argc, arg, type, &data[pos]);
 			data[pos].color = cyan;
 			pos = pos + 1;
 		} else if (type == COLOR) {
@@ -111,11 +111,6 @@ int parse_args(char *cmdname, char **argv, int argc, elem data[DATA_MAX_LEN], in
 				print_usage(argv[0]);
 				ok = FALSE;
 			}
-		} else if (type == WORD) {
-			arg = arg + 1;
-			//ok = append_word(argv, argc, arg, &data[pos]);
-			data[pos].color = cyan;
-			pos = pos + 1;
 		} else if (type == SETTINGS) {
 			arg = arg + 1;
 			ok = argc - 1 == arg;
@@ -136,6 +131,11 @@ int parse_args(char *cmdname, char **argv, int argc, elem data[DATA_MAX_LEN], in
 	}
 	if (type != SETTINGS) {
 		*data_len = pos;
+		/*int p = 0;
+		while (p < data_len) {
+			printf("%i: {%i, %s, %s%s}\n", p, (int)data[p].type, data[p].color, data[p].str, decolor);
+			p = p + 1;
+		}*/
 	}
 	return ok;
 }
