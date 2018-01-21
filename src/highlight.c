@@ -58,6 +58,12 @@ void copy(char src[], int src_len, char dst_base[], int *dst_offset) {
 	*dst_offset = *dst_offset + src_len;
 }
 
+void prepare_and_copy(char *from, int from_prev, int from_cur, char *to, int *to_base) {
+	char *tmp = from + from_prev;
+	int tmp_len = from_cur - from_prev;
+	copy(tmp, tmp_len, to, to_base);
+}
+
 int emphase_substr(char str[], char *color, int str_len, char wrbuf[], int *pos) {
 	copy(color, strlen(color), wrbuf, pos);
 	copy(str, str_len, wrbuf, pos);
@@ -73,9 +79,7 @@ int emphase_line(char rdbuf[], int rdbuf_len, char wrbuf[], elem data[DATA_MAX_L
 		char *d = data[data_index].str;
 		int d_len = strlen(d);
 
-		char *tmp = rdbuf + rdpos_prev;
-		int tmp_len = rdpos_cur - rdpos_prev;
-		copy(tmp, tmp_len, wrbuf, &wrpos_cur);
+		prepare_and_copy(rdbuf, rdpos_prev, rdpos_cur, wrbuf, &wrpos_cur);
 		emphase_substr(d, data[data_index].color, d_len, wrbuf, &wrpos_cur);
 
 		rdpos_cur = rdpos_cur + d_len;
@@ -83,8 +87,6 @@ int emphase_line(char rdbuf[], int rdbuf_len, char wrbuf[], elem data[DATA_MAX_L
 
 		find_substr(data, data_len, rdbuf, rdbuf_len, &rdpos_cur, &data_index);
 	}
-		char *tmp = rdbuf + rdpos_prev;
-		int tmp_len = rdpos_cur - rdpos_prev;
-		copy(tmp, tmp_len, wrbuf, &wrpos_cur);
+	prepare_and_copy(rdbuf, rdpos_prev, rdpos_cur, wrbuf, &wrpos_cur);
 	return wrpos_cur;
 }
