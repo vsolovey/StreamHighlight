@@ -6,7 +6,6 @@
 #include "color_settings_parser.h"
 #include "highlight.h"
 
-
 void get_buf(char **buf, size_t *len, int new_len) {
 	int new_buf_len = new_len * 21;
 	if (new_buf_len > *len) {
@@ -23,9 +22,13 @@ void get_buf(char **buf, size_t *len, int new_len) {
 void main(int argc, char **argv) {
 	colors_init();
 
-	char *data[2][DATA_MAX_LEN];
+	elem data[DATA_MAX_LEN];
 	int data_len = 0;
 	int ok = parse_args(argv[0], argv+1, argc-1, data, &data_len);
+	int i = 0;
+	while (i < data_len) {
+		i = i + 1;
+	}
 
 	if (ok == TRUE) {
 		size_t rd_len = 0;

@@ -5,13 +5,6 @@
 #include "simple_map.h"
 #include "preset_file_parser.h"
 
-#define UNKNOWN 0
-#define SUBSTRING 1
-#define WORD 2
-#define COLOR 3
-#define SETTINGS 4
-#define HELP 5
-
 void print_usage(char *cmd) {
 	printf("usage: %s { -s substring [-c color] | -w word [-c color] }\n       %s -f config_file\n       %s -h\n    -s substring   look for substring\n    -w word        look for word\n    -c color       paint substring with color\n    -f filename    use config file\n    -h             print help\n", cmd, cmd, cmd);
 }
@@ -41,10 +34,11 @@ int parse_arg_type(char *arg) {
 	return arg_type;
 }
 
-int append_substring(char **argv, int argc, int arg_pos, char *strings[], int string_pos) {
+int append_substring(char **argv, int argc, int arg_pos, elem *e) {
 	int ret = TRUE;
 	if (arg_pos < argc) {
-		strings[string_pos] = argv[arg_pos];
+		e->type = SUBSTRING;
+		e->str = argv[arg_pos];
 	} else {
 		print_usage(argv[0]);
 		ret = FALSE;
@@ -65,9 +59,9 @@ int is_valid_color(char *color) {
 	return i == len;
 }
 
-int append_color(char **argv, int argc, int arg_pos, char *colors[], int color_pos) {
+int append_color(char **argv, int argc, int arg_pos, elem *e) {
 	int ret = TRUE;
-	if (color_pos >= 0 && arg_pos < argc) {
+	if (arg_pos < argc) {
 		char *color = argv[arg_pos];
 		if (is_valid_color(color)) {
 			if (!map_contain(color)) {
@@ -76,7 +70,7 @@ int append_color(char **argv, int argc, int arg_pos, char *colors[], int color_p
 		} else {
 			map_put(color, get_color(color));
 		}
-		colors[color_pos] = map_get(color);
+		e->color = map_get(color);
 	} else {
 		print_usage(argv[0]);
 		ret = FALSE;
@@ -84,16 +78,16 @@ int append_color(char **argv, int argc, int arg_pos, char *colors[], int color_p
 	return ret;
 }
 
-void print_arr(int argc, char **argv) {
+/*void print_arr(int argc, char **argv) {
 	int i = 0;
 	while (i < argc) {
 		printf("%s\n", argv[i]);
 		i = i + 1;
 	}
-}
+}*/
 
-int parse_args(char *cmdname, char **argv, int argc, char *data[2][DATA_MAX_LEN], int *data_len) {
-	print_arr(argc, argv);
+int parse_args(char *cmdname, char **argv, int argc, elem data[DATA_MAX_LEN], int *data_len) {
+	//print_arr(argc, argv);
 	int ok = TRUE;
 	int pos = *data_len;
 	int type = UNKNOWN;
@@ -106,15 +100,22 @@ int parse_args(char *cmdname, char **argv, int argc, char *data[2][DATA_MAX_LEN]
 			ok = FALSE;
 		} else if (type == SUBSTRING) {
 			arg = arg + 1;
-			ok = append_substring(argv, argc, arg, data[0], pos);
-			data[1][pos] = cyan;
+			ok = append_substring(argv, argc, arg, &data[pos]);
+			data[pos].color = cyan;
 			pos = pos + 1;
 		} else if (type == COLOR) {
 			arg = arg + 1;
-			ok = append_color(argv, argc, arg, data[1], pos - 1);
-		} else if (type == HELP) {
-			print_usage(cmdname);
-			ok = FALSE;
+			if (pos > 0) {
+				ok = append_color(argv, argc, arg, &data[pos - 1]);
+			} else {
+				print_usage(argv[0]);
+				ok = FALSE;
+			}
+		} else if (type == WORD) {
+			arg = arg + 1;
+			//ok = append_word(argv, argc, arg, &data[pos]);
+			data[pos].color = cyan;
+			pos = pos + 1;
 		} else if (type == SETTINGS) {
 			arg = arg + 1;
 			ok = argc - 1 == arg;
@@ -127,6 +128,9 @@ int parse_args(char *cmdname, char **argv, int argc, char *data[2][DATA_MAX_LEN]
 					ok = parse_args(cmdname, file_argv, file_argc, data, data_len);
 				}
 			}
+		} else if (type == HELP) {
+			print_usage(cmdname);
+			ok = FALSE;
 		}
 		arg = arg + 1;
 	}

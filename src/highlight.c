@@ -10,8 +10,8 @@ data_len - length of data
 data_pos - start position for looking for candidates
 returns index of candidate. If the index equals data_len, then data have no candidates.
 */
-int get_candidate(char ch, char *data[], int data_len, int data_pos) {
-	while (data_pos < data_len && data[data_pos][0] != ch) {
+int get_candidate(char ch, elem data[], int data_len, int data_pos) {
+	while (data_pos < data_len && data[data_pos].str[0] != ch) {
 		data_pos = data_pos + 1;
 	}
 	return data_pos;
@@ -21,13 +21,13 @@ int matched(char substring[], char rdbuf[], int pos, int rdbuf_len) {
 	char *string = rdbuf + pos;
 	int len = rdbuf_len - pos;
 	int i = 0;
-	while (/*substring[i] != 0 &&*/ i < len && substring[i] == string[i]) {
+	while (i < len && substring[i] == string[i]) {
 		i = i + 1;
 	}
 	return substring[i] == 0;
 }
 
-void find_substr(char *data[DATA_MAX_LEN], int data_len, char rdbuf[], int rdbuf_len, int *rdpos_cur, int *data_index) {
+void find_substr(elem data[DATA_MAX_LEN], int data_len, char rdbuf[], int rdbuf_len, int *rdpos_cur, int *data_index) {
 	int i = -1;
 	int start_from = 0;
 	int pos = *rdpos_cur;
@@ -36,7 +36,7 @@ void find_substr(char *data[DATA_MAX_LEN], int data_len, char rdbuf[], int rdbuf
 		if (candidate == data_len) {
 			pos = pos + 1;
 		} else {
-			while (candidate < data_len && !matched(data[candidate], rdbuf, pos, rdbuf_len)) {
+			while (candidate < data_len && !matched(data[candidate].str, rdbuf, pos, rdbuf_len)) {
 				start_from = candidate + 1;
 				candidate = get_candidate(rdbuf[pos], data, data_len, start_from);
 			}
@@ -64,24 +64,24 @@ int emphase_substr(char str[], char *color, int str_len, char wrbuf[], int *pos)
 	copy(decolor, strlen(decolor), wrbuf, pos);
 }
 
-int emphase_line(char rdbuf[], int rdbuf_len, char wrbuf[], /*int wrbuflen,*/ char *data[2][DATA_MAX_LEN], int data_len) {
+int emphase_line(char rdbuf[], int rdbuf_len, char wrbuf[], elem data[DATA_MAX_LEN], int data_len) {
 	int rdpos_prev = 0, rdpos_cur = 0;
 	int wrpos_cur = 0;
 	int data_index = 0;
-	find_substr(data[0], data_len, rdbuf, rdbuf_len, &rdpos_cur, &data_index);
+	find_substr(data, data_len, rdbuf, rdbuf_len, &rdpos_cur, &data_index);
 	while (rdpos_cur < rdbuf_len) {
-		char *d = data[0][data_index];
+		char *d = data[data_index].str;
 		int d_len = strlen(d);
 
 		char *tmp = rdbuf + rdpos_prev;
 		int tmp_len = rdpos_cur - rdpos_prev;
 		copy(tmp, tmp_len, wrbuf, &wrpos_cur);
-		emphase_substr(d, data[1][data_index], d_len, wrbuf, &wrpos_cur);
+		emphase_substr(d, data[data_index].color, d_len, wrbuf, &wrpos_cur);
 
 		rdpos_cur = rdpos_cur + d_len;
 		rdpos_prev = rdpos_cur;
 
-		find_substr(data[0], data_len, rdbuf, rdbuf_len, &rdpos_cur, &data_index);
+		find_substr(data, data_len, rdbuf, rdbuf_len, &rdpos_cur, &data_index);
 	}
 		char *tmp = rdbuf + rdpos_prev;
 		int tmp_len = rdpos_cur - rdpos_prev;
