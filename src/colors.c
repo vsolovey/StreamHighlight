@@ -4,6 +4,20 @@
 // color = '<esc>[<num>m'
 //const char esc = '\x1B'; '\e'
 
+#define _black 0
+#define _red 1
+#define _green 2
+#define _yellow 3
+#define _blue 4
+#define _magneta 5
+#define _cyan 6
+#define _gray 7
+#define _white 7
+
+#define none (-1)
+#define light 8
+#define dark 9
+#define bg 10
 
 const char *black = "\e[30m";
 const char *red = "\e[31m";
@@ -84,9 +98,76 @@ void colors_init() {
     colors[37] = white_bg;
 }
 
-const char *get_color(char *num) {
+int continues(char *str, int *pos, char *pattern, int result) {
+    int ret = none;
+    char *tmp = str + *pos;
+    int len = strlen(pattern);
+    if (memcmp(tmp, pattern, len) == 0) {
+        ret = result;
+        *pos = *pos + len;
+    }
+    return ret;
+}
+
+int parse_prefix(char *str, int *pos) {
+    int pref = continues(str, pos, "light", light);
+    if (pref == none) { pref = continues(str, pos, "dark", dark); }
+    return pref;
+}
+
+int parse_color_name(char *str, int *pos) {
+    int color = continues(str, pos, "red", _red);
+    if (color == none) {
+        color = continues(str, pos, "green", _green);
+        if (color == none) { color = continues(str, pos, "cyan", _cyan); }
+        if (color == none) { color = continues(str, pos, "yellow", _yellow); }
+        if (color == none) {
+            color = continues(str, pos, "blue", _blue);
+            if (color == none) { color = continues(str, pos, "magneta", _magneta); }
+            if (color == none) {
+                color = continues(str, pos, "white", _white);
+                if (color == none) { color = continues(str, pos, "gray", _gray); }
+                if (color == none) { color = continues(str, pos, "black", _black); }
+            }
+        }
+    }
+    return color;
+}
+
+int resolve_alias(char *alias) {
+    int num = 0;
+    int pos = 0;
+    int pref, color, post;
+    pref = parse_prefix(alias, &pos);
+    if (pref != none) {
+        pos = pos + 1;
+    }
+    color = parse_color_name(alias, &pos);
+    post = continues(alias, &pos, "_bg", bg);
+
+    if (pref == dark && color == _gray) {
+        color = _black;
+    } else if (pref == light && color == _gray) {
+        pref = none;
+    } else if (color == _white) {
+        pref = light;
+    }
+    if (color != none) {
+        num = 30 + color;
+        if (pref != none) {
+            num = num + 60;
+        }
+        if (post != none) {
+            num = num + 10;
+        }
+    } else {
+        num = 30 + _cyan;
+    }
+    return num;
+}
+
+const char *prepare_color(int i) {
     const char *color;
-    int i = atoi(num);
     if (i >= 30 && i <= 37 || i >= 40 && i <= 47) {
         color = colors[i - 30];
     } else if (i >= 90 && i <= 97 || i >= 100 && i <= 107) {
@@ -95,6 +176,14 @@ const char *get_color(char *num) {
         color = cyan;
     }
     return color;
+}
+
+const char *get_color(char *num) {
+    int i = atoi(num);
+    if (i == 0 && strlen(num) > 0) {
+        i = resolve_alias(num);
+    }
+    return prepare_color(i);
 }
 
 /*char *get_compo_color(char *fg, char *bg) {
