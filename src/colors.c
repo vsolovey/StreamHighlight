@@ -70,23 +70,23 @@ void colors_init() {
     colors[6] = cyan;
     colors[7] = light_gray;
 
-    colors[10] = dark_gray;
-    colors[11] = light_red;
-    colors[12] = light_green;
-    colors[13] = light_yellow;
-    colors[14] = light_blue;
-    colors[15] = light_magneta;
-    colors[16] = light_cyan;
-    colors[17] = white;
+    colors[10] = black_bg;
+    colors[11] = red_bg;
+    colors[12] = green_bg;
+    colors[13] = yellow_bg;
+    colors[14] = blue_bg;
+    colors[15] = magneta_bg;
+    colors[16] = cyan_bg;
+    colors[17] = light_gray_bg;
 
-    colors[20] = black_bg;
-    colors[21] = red_bg;
-    colors[22] = green_bg;
-    colors[23] = yellow_bg;
-    colors[24] = blue_bg;
-    colors[25] = magneta_bg;
-    colors[26] = cyan_bg;
-    colors[27] = light_gray_bg;
+    colors[20] = dark_gray;
+    colors[21] = light_red;
+    colors[22] = light_green;
+    colors[23] = light_yellow;
+    colors[24] = light_blue;
+    colors[25] = light_magneta;
+    colors[26] = light_cyan;
+    colors[27] = white;
 
     colors[30] = dark_gray_bg;
     colors[31] = light_red_bg;
