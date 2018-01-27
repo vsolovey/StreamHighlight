@@ -1,6 +1,6 @@
 CC=gcc
 
-NAME=emph
+NAME=shlight
 
 INC_DIR=include
 SRC_DIR=src
@@ -24,7 +24,7 @@ $(OBJ_DIR):
 $(BIN_DIR):
 	mkdir $(BIN_DIR)
 
-$(BIN_DIR)/$(NAME): $(OBJ) $(SRC_DIR)/main/main.c | $(BIN_DIR)
+$(BIN_DIR)/$(NAME): $(OBJ) $(SRC_DIR)/$(NAME)/main.c | $(BIN_DIR)
 	$(CC) $(CFLAGS) -o $(BIN_DIR)/$(NAME) $^
 	strip -s $(BIN_DIR)/$(NAME)
 
