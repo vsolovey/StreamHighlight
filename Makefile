@@ -25,14 +25,18 @@ $(BIN_DIR):
 	mkdir $(BIN_DIR)
 
 $(BIN_DIR)/$(NAME): $(OBJ) $(SRC_DIR)/$(NAME)/main.c | $(BIN_DIR)
-	$(CC) $(CFLAGS) -o $(BIN_DIR)/$(NAME) $^
-	strip -s $(BIN_DIR)/$(NAME)
+	$(CC) $(CFLAGS) -o $@ $^
+	strip -s $@
+
+$(BIN_DIR)/un$(NAME): $(SRC_DIR)/un$(NAME)/main.c | $(BIN_DIR)
+	$(CC) $(CFLAGS) -o $@ $^
+	strip -s $@
 
 $(BIN_DIR)/%: $(TEST_DIR)/%.c $(OBJ) | $(BIN_DIR)
-	#echo '$!' '$%' '$&' '$*' '$<' '$^'
+	#echo '$!' '$%' '$&' '$*' '$<' '$^' '$@'
 	$(CC) $(CFLAGS) -o $(BIN_DIR)/$* $^
 
-compilemain: $(BIN_DIR)/$(NAME)
+compilemain: $(BIN_DIR)/$(NAME) $(BIN_DIR)/un$(NAME)
 
 
 build: compilemain
