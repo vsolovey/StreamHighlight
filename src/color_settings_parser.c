@@ -46,29 +46,16 @@ int append_substring(char **argv, int argc, int arg_pos, short type, elem *e) {
 	return ret;
 }
 
-int is_valid_color(char *color) {
-	int len = strlen(color);
-	int i = 0;
-	if (len <= 3 && len > 0) {
-		char ch = color[i];
-		while (i < len && ch >= '0' && ch <= '9') {
-			i = i + 1;
-			ch = color[i];
-		}
-	}
-	return i == len;
-}
-
 int append_color(char **argv, int argc, int arg_pos, elem *e) {
 	int ret = TRUE;
 	if (arg_pos < argc) {
 		char *color = argv[arg_pos];
-		if (is_valid_color(color)) {
+		if (colors_is_valid(color)) {
 			if (!map_contain(color)) {
-				map_put(color, get_color(color));
+				map_put(color, colors_get(color));
 			}
 		} else {
-			map_put(color, get_color(color));
+			map_put(color, colors_get_default());
 		}
 		e->color = map_get(color);
 	} else {
@@ -101,7 +88,7 @@ int parse_args(char *cmdname, char **argv, int argc, elem data[DATA_MAX_LEN], in
 		} else if (type == SUBSTRING || type == WORD) {
 			arg = arg + 1;
 			ok = append_substring(argv, argc, arg, type, &data[pos]);
-			data[pos].color = cyan;
+			data[pos].color = colors_get_default();
 			pos = pos + 1;
 		} else if (type == COLOR) {
 			arg = arg + 1;

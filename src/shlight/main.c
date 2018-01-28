@@ -46,4 +46,5 @@ void main(int argc, char **argv) {
 		}
 		free(wrbuf);
 	}
+	colors_dispose();
 }

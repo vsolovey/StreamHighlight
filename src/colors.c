@@ -1,4 +1,6 @@
 #include <string.h>
+#include <malloc.h>
+#include <stdio.h>
 #include <stdlib.h>
 
 // color = '<esc>[<num>m'
@@ -60,6 +62,9 @@ const char *decolor = "\e[0m";
 
 static const char *colors[40];
 
+static char *custom_colors[256];
+static int cust_clr_len = 0;
+
 void colors_init() {
     colors[0] = black;
     colors[1] = red;
@@ -98,9 +103,32 @@ void colors_init() {
     colors[37] = white_bg;
 }
 
-int continues(char *str, int *pos, char *pattern, int result) {
+void colors_dispose() {
+    int i = 0;
+    while (i < cust_clr_len) {
+        free(custom_colors[i]);
+        i = i + 1;
+    }
+}
+
+/*int parse_num(char *color) {
+    int num = 0;
+    int i = 0;
+    char ch = color[i];
+    while (ch != '\0' && ch >= '0' && ch <= '9') {
+        num = 10 * num + (ch - '0');
+        i = i + 1;
+        ch = color[i];
+    }
+    if (ch != '\0') {
+        num = 0;
+    }
+    return num;
+}*/
+
+int continues(const char *str, int *pos, const char *pattern, int result) {
     int ret = none;
-    char *tmp = str + *pos;
+    const char *tmp = str + *pos;
     int len = strlen(pattern);
     if (memcmp(tmp, pattern, len) == 0) {
         ret = result;
@@ -109,13 +137,13 @@ int continues(char *str, int *pos, char *pattern, int result) {
     return ret;
 }
 
-int parse_prefix(char *str, int *pos) {
+int parse_prefix(const char *str, int *pos) {
     int pref = continues(str, pos, "light", light);
     if (pref == none) { pref = continues(str, pos, "dark", dark); }
     return pref;
 }
 
-int parse_color_name(char *str, int *pos) {
+int parse_color_name(const char *str, int *pos) {
     int color = continues(str, pos, "red", _red);
     if (color == none) {
         color = continues(str, pos, "green", _green);
@@ -134,7 +162,7 @@ int parse_color_name(char *str, int *pos) {
     return color;
 }
 
-int resolve_alias(char *alias) {
+int resolve_alias(const char *alias) {
     int num = 0;
     int pos = 0;
     int pref, color, post;
@@ -161,9 +189,103 @@ int resolve_alias(char *alias) {
             num = num + 10;
         }
     } else {
-        num = 30 + _cyan;
+        num = 0;
     }
     return num;
+}
+
+int validate_num(const char *color, int pos) {
+	char ch = color[pos];
+	while (ch >= '0' && ch <= '9') {
+		pos = pos + 1;
+		ch = color[pos];
+	}
+	return pos;
+}
+
+int validate_builtin(const char *color, int len) {
+    return validate_num(color, 0) == len && len <= 3;
+}
+
+int validate_alias(const char *color, int len) {
+    return resolve_alias(color) != 0;
+}
+
+int is_valid_rgb_segment(const char *color, int pos, int segment, int len) {
+    int new_pos = validate_num(color, pos);
+    return new_pos - pos <= 3
+        && (segment == 0 && new_pos == len
+            || segment > 0 && color[new_pos] == ',' && is_valid_rgb_segment(color, new_pos + 1, segment - 1, len));
+}
+
+int validate_rgb(const char *color, int len) {
+    /*int i = validate_num(color, 0);
+    if (color[i] == ',') {
+        i = validate_num(color, i + 1);
+        if (color[i] == ',') {
+            i = validate_num(color, i + 1);
+        }
+    }*/
+    #define segments 3
+    return is_valid_rgb_segment(color, 0, segments - 1, len);
+}
+
+int colors_is_valid(char *color) {
+	int len = strlen(color);
+	int is_valid = len > 0;
+	if (is_valid) {
+		char ch = color[0];
+		if (ch >= '0' && ch <= '9') {
+			if (len <= 3) {
+				is_valid = validate_builtin(color, len);
+			} else {
+				is_valid = validate_rgb(color, len);
+			}
+		} else {
+			is_valid = validate_alias(color, len);
+		}
+	}
+	return is_valid;
+}
+
+int get_num(const char *color, int *pos) {
+    int num = 0;
+    int i = *pos;
+	char ch = color[i];
+	while (ch >= '0' && ch <= '9') {
+        num = 10 * num + (ch - '0');
+		i = i + 1;
+		ch = color[i];
+	}
+    *pos = i;
+	return num;
+}
+
+char *new_color(const char *pattern, int r, int g, int b, int len) {
+    //char *ret = (char*)malloc(24); // \0x1b[38;2;<rrr>;<ggg>;<bbb>m<'\0'>
+    char *color = (char*)malloc(8 + 2 + len + 1 + 1); // prefix - 8, m - 1, '\0' - 1
+    sprintf(color, pattern, r, g, b);
+    custom_colors[cust_clr_len] = color;
+    cust_clr_len = cust_clr_len + 1;
+    return color;
+}
+
+const char *parse_rgb(char *rgb_color) {
+    int pos = 0;
+    int r = get_num(rgb_color, &pos);
+    pos = pos + 1;
+    int g = get_num(rgb_color, &pos);
+    pos = pos + 1;
+    int b = get_num(rgb_color, &pos);
+    char *color = NULL;
+    if (rgb_color[pos] == '\0') {
+        color = new_color("\e[38;2;%i;%i;%im", r, g, b, pos);
+    }
+    return color;
+}
+
+const char *colors_get_default() {
+    return cyan;
 }
 
 const char *prepare_color(int i) {
@@ -173,17 +295,34 @@ const char *prepare_color(int i) {
     } else if (i >= 90 && i <= 97 || i >= 100 && i <= 107) {
         color = colors[i - 70];
     } else {
-        color = cyan;
+        color = colors_get_default();
     }
     return color;
 }
 
-const char *get_color(char *num) {
-    int i = atoi(num);
-    if (i == 0 && strlen(num) > 0) {
-        i = resolve_alias(num);
+const char *colors_get(char *color) {
+    const char *ret;
+
+    int pos = 0;
+    int num = 0;
+    if (color[0] >= '0' && color[0] <= '9') {
+        num = get_num(color, &pos);
+        if (color[pos] != '\0') {
+            num = 0;
+        }
+    } else {
+        num = resolve_alias(color);
     }
-    return prepare_color(i);
+
+    if (num == 0 && color[pos] != '\0') {
+        ret = parse_rgb(color);
+        if (ret == NULL) {
+            ret = colors_get_default();
+        }
+    } else {
+        ret = prepare_color(num);
+    }
+    return ret;
 }
 
 /*char *get_compo_color(char *fg, char *bg) {
