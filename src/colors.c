@@ -30,14 +30,14 @@ const char *magneta = "\e[35m";
 const char *cyan = "\e[36m";
 const char *light_gray = "\e[37m";
 
-const char *dark_gray = "\e[90m";
-const char *light_red = "\e[91m";
-const char *light_green = "\e[92m";
-const char *light_yellow = "\e[93m";
-const char *light_blue = "\e[94m";
-const char *light_magneta = "\e[95m";
-const char *light_cyan = "\e[96m";
-const char *white = "\e[97m";
+const char *dark_gray = "\e[1;30m";
+const char *light_red = "\e[1;31m";
+const char *light_green = "\e[1;32m";
+const char *light_yellow = "\e[1;33m";
+const char *light_blue = "\e[1;34m";
+const char *light_magneta = "\e[1;35m";
+const char *light_cyan = "\e[1;36m";
+const char *white = "\e[1;37m";
 
 
 const char *black_bg = "\e[40m";
@@ -49,14 +49,14 @@ const char *magneta_bg = "\e[45m";
 const char *cyan_bg = "\e[46m";
 const char *light_gray_bg = "\e[47m";
 
-const char *dark_gray_bg = "\e[100m";
-const char *light_red_bg = "\e[101m";
-const char *light_green_bg = "\e[102m";
-const char *light_yellow_bg = "\e[103m";
-const char *light_blue_bg = "\e[104m";
-const char *light_magneta_bg = "\e[105m";
-const char *light_cyan_bg = "\e[106m";
-const char *white_bg = "\e[107m";
+const char *dark_gray_bg = "\e[1;40m";
+const char *light_red_bg = "\e[1;41m";
+const char *light_green_bg = "\e[1;42m";
+const char *light_yellow_bg = "\e[1;43m";
+const char *light_blue_bg = "\e[1;44m";
+const char *light_magneta_bg = "\e[1;45m";
+const char *light_cyan_bg = "\e[1;46m";
+const char *white_bg = "\e[1;47m";
 
 const char *decolor = "\e[0m";
 
