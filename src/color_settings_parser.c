@@ -1,5 +1,4 @@
 #include <stdio.h>
-#include <string.h>
 #include "common.h"
 #include "colors.h"
 #include "simple_map.h"
@@ -65,16 +64,7 @@ int append_color(char **argv, int argc, int arg_pos, elem *e) {
 	return ret;
 }
 
-/*void print_arr(int argc, char **argv) {
-	int i = 0;
-	while (i < argc) {
-		printf("%s\n", argv[i]);
-		i = i + 1;
-	}
-}*/
-
 int parse_args(char *cmdname, char **argv, int argc, elem data[DATA_MAX_LEN], int *data_len) {
-	//print_arr(argc, argv);
 	int ok = TRUE;
 	int pos = *data_len;
 	short type = UNKNOWN;
@@ -118,11 +108,6 @@ int parse_args(char *cmdname, char **argv, int argc, elem data[DATA_MAX_LEN], in
 	}
 	if (type != SETTINGS) {
 		*data_len = pos;
-		/*int p = 0;
-		while (p < data_len) {
-			printf("%i: {%i, %s, %s%s}\n", p, (int)data[p].type, data[p].color, data[p].str, decolor);
-			p = p + 1;
-		}*/
 	}
 	return ok;
 }

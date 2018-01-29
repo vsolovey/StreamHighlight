@@ -1,7 +1,6 @@
 #include <string.h>
 #include <malloc.h>
 #include <stdio.h>
-#include <stdlib.h>
 
 // color = '<esc>[<num>m'
 //const char esc = '\x1B'; '\e'
@@ -111,21 +110,6 @@ void colors_dispose() {
     }
 }
 
-/*int parse_num(char *color) {
-    int num = 0;
-    int i = 0;
-    char ch = color[i];
-    while (ch != '\0' && ch >= '0' && ch <= '9') {
-        num = 10 * num + (ch - '0');
-        i = i + 1;
-        ch = color[i];
-    }
-    if (ch != '\0') {
-        num = 0;
-    }
-    return num;
-}*/
-
 int continues(const char *str, int *pos, const char *pattern, int result) {
     int ret = none;
     const char *tmp = str + *pos;
@@ -219,13 +203,6 @@ int is_valid_rgb_segment(const char *color, int pos, int segment, int len) {
 }
 
 int validate_rgb(const char *color, int len) {
-    /*int i = validate_num(color, 0);
-    if (color[i] == ',') {
-        i = validate_num(color, i + 1);
-        if (color[i] == ',') {
-            i = validate_num(color, i + 1);
-        }
-    }*/
     #define segments 3
     return is_valid_rgb_segment(color, 0, segments - 1, len);
 }
@@ -324,23 +301,3 @@ const char *colors_get(char *color) {
     }
     return ret;
 }
-
-/*char *get_compo_color(char *fg, char *bg) {
-    int f = 0, b = 0;
-    int key = 0;
-    if (fg != NULL) {
-        f = atoi(fg);
-    }
-    if (bg != NULL) {
-        b = atoi(bg);
-    }
-    char *color;
-    if (b == 0) {
-        color = get_default_color(f);
-    } else if (f == 0) {
-        color = get_default_color(b);
-    } else {
-
-    }
-    return color;
-}*/
