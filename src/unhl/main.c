@@ -50,7 +50,7 @@ int test_candidate(char *input, int len, int pos) {
     if (parse_esc(input, len, i) && parse_param_list(input, len, i) && input[*i] == 'm') {
         ret = *i + 1;
     } else {
-        ret = len-1;
+        ret = len;
     }
     return ret;
 }
@@ -100,7 +100,7 @@ void main(int argc, char **argv) {
     while (feof(stdin) == 0) {
         int read = strlen(rdbuf);
         int write = strip_line(rdbuf, read, wrbuf);
-        int written = fwrite(wrbuf, 1, write, stdout);
+        int written = fwrite(wrbuf, 1, write-1, stdout); //write all except '\0'
         stdread = getline(&rdbuf, &rd_len, stdin);
         get_buf(&wrbuf, &wr_len, rd_len);
     }
