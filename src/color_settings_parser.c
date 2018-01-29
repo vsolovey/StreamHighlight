@@ -5,7 +5,7 @@
 #include "preset_file_parser.h"
 
 void print_usage(char *cmd) {
-	printf("usage: %s { -s substring [-c color] | -w word [-c color] }\n       %s -f config_file\n       %s -h\n    -s substring   look for substring\n    -w word        look for word\n    -c color       paint substring with color\n    -f filename    use config file\n    -h             print help\n", cmd, cmd, cmd);
+	printf("usage: %s { -s substring [-c color] | -w word [-c color] }\n       %s -f config_file\n       %s -h\n    -s substring   look for substring\n    -w word        look for word\n    -c color       set color for substring\n                   color can be:\n                   predefined: [30..37,90..97] - foreground, [40..47,100..107] - background\n                   alias: cyan, light_green, read_bg etc.\n                   custom: 96,64,32 - RGB\n    -f filename    use config file\n    -h             print help\n", cmd, cmd, cmd);
 }
 
 int parse_arg_type(char *arg) {
